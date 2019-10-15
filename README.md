@@ -1,0 +1,2 @@
+# comdig_lib_code
+Es donde guardamos librerias en python que no son OOT sino de programacion tradicional con python para gnuradio. Pero aun así se mantiene un vinculo con GRC, pues además de poder usar esta libreria en programacion en python puro es posible sacarle provecho con GRC,  por ejemplo así: 1) los bloques y funciones que creamos para GRC bien sean en python blocks o en un OOT pueden ser guardados aquí como el backup definitivo. 2) es posible sacar código de aquí para pasarlo al GRC, por ejemplo para crear un nuevo bloque en GRC o en un python block
