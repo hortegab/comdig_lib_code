@@ -71,6 +71,7 @@ class e_add_cc(gr.sync_block):
     #   input_items es un cubo de LxMxZ
     # En el caso de output_items, aplica lo mismo dicho para input_items, pero con las senales
     # de salida y lo definido para out_sig
+    # el "self" en la declaracion creo que es para que la funcion acepte el uso de self internamente
     
     def work(self, input_items, output_items):
         in0 = input_items[0]
@@ -124,13 +125,13 @@ class e_vector_fft_ff(gr.sync_block):
 
 
 ####################################################
-##     clase vector_average_hob                   ##
+##     clase e_vector_average_hob                   ##
 ####################################################
  
 import numpy
 from gnuradio import gr
  
-class vector_average_hob(gr.sync_block):
+class e_vector_average_hob(gr.sync_block):
     """
     El bloque vector_averager_hob recibe una senal con tramas de tamano fijo de N valores y va entregando una trama del mismo tamano que corresponde a la trama media de todas las tramas que va recibiendo. 
 Los parametros usados son:
@@ -169,3 +170,51 @@ Nensayos: Es el umbral que limita el numero maximo de promedios correctamente re
         # Entrega de resultado
         out0[:]=self.med
         return len(out0)
+
+####################################################
+##          e_vector_psd_ff                       ##
+####################################################
+class e_vector_psd_ff(gr.sync_block):
+    """calcula la fft en magnitud a una senal vectorial de N muestras y emtrega N muestras del espectro. N deber ser potencia de 2"""
+
+    def __init__(self, N=128, Nensayos=10000):  
+        gr.sync_block.__init__(
+            self,
+            name='e_vector_fft_ff',   
+            in_sig=[(np.float32,N)],
+            out_sig=[(np.float32,N)]
+        )
+        self.N = N
+        self.Nensayos=numpy.uint64=Nensayos
+        self.med=numpy.empty(N,dtype=numpy.float64)
+        self.count=numpy.uint64=0
+
+    def vec_average(self, in0):
+        # El tamano de la matriz in0 es L[0]xL[1]=L[0]xN
+        L=in0.shape
+ 
+        # conteo de funciones muestras (filas de matriz) procesadas
+        if self.count < self.Nensayos:
+            self.count += L[0] 
+ 
+        # La media de las funciones muestras (filas de matriz) que tiene in0
+        mean=in0.mean(0)    
+ 
+        # ajuste de la media ya calculada, con la media de in0
+        self.med = (self.med*(self.count-L[0])+mean*L[0])/self.count
+ 
+        # Entrega de resultado
+        # in0[:]=self.med # asi se entregaria el resultado modificando la misma entrada
+        # return self.med
+
+    def work(self, input_items, output_items):
+        in0 = input_items[0]
+    	out0 = output_items[0]
+    	self.vec_average(abs(np.fft.fftshift(np.fft.fft(in0,self.N),1))**2)
+        out0[:]=self.med
+        return len(output_items[0])
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!                    FUNCIONES PURAS                         !!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
