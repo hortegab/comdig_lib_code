@@ -1,77 +1,29 @@
+from gnuradio import blocks
 from gnuradio import gr
 import numpy as np
+from gnuradio import filter
+from gnuradio.filter import firdes
+import math
+
 
 ####################################################
 ##     Plantilla: clase e_add_cc                  ##
 ####################################################
+# Nota: para una explicacion bien detallada de lo que significa cada cosa
+# abra el archivo plantillas.py
 
-
-# Se recomienda que el nombre de la clase finalice con una o dos letras especiales:
-# nombre_ff: cuando en el bloque sus entradas y salidas son senales reales y de tipo flotante
-# nombre_f: el bloque solo tiene una entrada o una salida y es una senal real de tipo flotante
-# En vez de "f" pueden usarse: c (senal compleja),  i (entera), b (binaria), etc.
-# Nota: esta plantilla tambien puede ser consultada en la libreria comdig_Lib_Bloques, dentro del bloque b_help
- 
 class e_add_cc(gr.sync_block):  
     """Aqui debes explicar como funciona el bloque, los parametros usados. En este caso particular el proposito es que esta clase sirva como ejemplo o plantilla para otras clase. La idea es que cada vez que vayas a crear una clase para un bloque GNU Radio vuelvas aqui ya que no es facil memorizar todos los detalles para crear un bloque GNU Radio. En todo caso, el ejemplo consiste en un bloque para una suma escalada de dos senales complejas. Por lo tanto hay dos senales de entrada y una de salida. Si escala=0.5 lo que se logra es promediar las dos senales"""
- 
-    # Dentro de la funcion __init__(), deben definirse los parametros de configuracion del bloque.
-    # A cada parametro se le da un valor por defecto
-    # ejemplo 1, solo hay un parametro de configuracion: def __init__(self, amp=1.0)
-    # ejemplo 2, hay dos parametros: def __init__(self, amp=1.0, samp_rate= 32000)
-    # a continuacion esta el caso de un solo parametro que hemos llamado escala
     def __init__(self, escala=0.5):
- 
-        # En la siguiente funcion debes recordar que usaras:
-        # sync: cuando tu bloque sea un bloque de tipo sincrono (por cada muestra entrante habra una saliente)
-        # decim: cuando es un bloque decimador (por cada muestra saliente hay un numero entero de muestras entrantes)
-        # interp: cuando es un bloque interpolador (por cada muestra entrante hay un numero entero de muestras salientes)
-        # basic: cuando no hay relacion entre el numero de muestras entrantes y las salientes
-        # mas en: https://wiki.gnuradio.org/index.php/Guided_Tutorial_GNU_Radio_in_Python#3.3.1._Choosing_a_Block_Type
         gr.sync_block.__init__(
             self,
+            name='e_add_cc', 
  
-            # Lo siguiente es para definir el nombre que tendra nuestro bloque para los usuarios de GRC
-            name='Plantilla_para_crear_bloques_cc', 
- 
-            # A continuacion se definen los tipos de senales de entrada y salida. Veamos algunos ejemplos:
-            # [np.complex64]: cuando se tiene una sola senal y es compleja
-            # [np.float32]: cuando se tiene una sola senal y es de tipo real y flotante
-            # [np.float32, np.complex64]: cuando hay dos senales: una de tipo real flotante y la otra es compleja
-            # otros casos: int8 o byte (entero de 8 bits, que en C++ se conoce como char)
-            # No hemos explorado mas casos, pero no es tan sencillo. Uno supondria que otros casos posibles son:
-            # int16 (en C++ se conoce como short), int32, int64. Los dos primeros funcionan, pero int64 no.
-            # En el siguiente ejemplo hay dos entradas complejas y una salida real.
             in_sig=[np.complex64,np.complex64], 
             out_sig=[np.complex64]
         )
- 
-        # las variables que entran como parametros del bloque deben ser declaradas nuevamente asi:
         self.escala=escala
- 
-        # abajo se puede escribir lo que se le antoje al programador, por ejemplo:
-        # self.coef=1.0: define la variable global coef y le asigna el valor 1.0
-        # self significa que es una variable global, que se puede invocar directamente desde otras funciones.
-        # En todo caso, para las cosas que se definan aqui hay que tener en cuenta que:
-        # -  esto es parte del constructor de la clase, por lo tanto, por cada bloque que se cree con esta clase
-        #    estas cosas se invocaran solo una vez
-        # -  Se supone que lo que se cree aqui es para ser usado, de manera que deberia ser usado en work()
-        # A continuacion vamos a suponer que necesitamos usar constante  coef=1.0
         self.coef = 1.0
- 
-    # La funcion work() siempre debe estar presente en un bloque. Es alli donde estara la logica del bloque 
-    # Es importante que tengas en cuenta lo siguiente:
-    # - input_items: es un matrix de LxM, por lo tanto,
-    # - input_items[0]: es un vector de longitud L, por lo tanto trae L muestras de una senal
-    # - input_items[1]: es un vector de longitud L, por lo tanto trae L muestras de una segunda senal
-    # - M esta definido por la cantidad de entradas que tiene el bloque, es decir, lo declarado arriba en in_sig
-    # - L es desconocido y puede ir cambiando cada vez que llega una nueva rafaga de muestras, 
-    #   se puede calcular como L=len(input_items[0])
-    # - Si el bloque es de tipo vectorial, le aconsejamos ver otro ejemplo, ya que en ese caso
-    #   input_items es un cubo de LxMxZ
-    # En el caso de output_items, aplica lo mismo dicho para input_items, pero con las senales
-    # de salida y lo definido para out_sig
-    # el "self" en la declaracion creo que es para que la funcion acepte el uso de self internamente
     
     def work(self, input_items, output_items):
         in0 = input_items[0]
@@ -128,9 +80,6 @@ class e_vector_fft_ff(gr.sync_block):
 ##     clase e_vector_average_hob                   ##
 ####################################################
  
-import numpy
-from gnuradio import gr
- 
 class e_vector_average_hob(gr.sync_block):
     """
     El bloque vector_averager_hob recibe una senal con tramas de tamano fijo de N valores y va entregando una trama del mismo tamano que corresponde a la trama media de todas las tramas que va recibiendo. 
@@ -144,9 +93,9 @@ Nensayos: Es el umbral que limita el numero maximo de promedios correctamente re
  
         # Nuestras variables especificas
         self.N=N
-        self.Nensayos=numpy.uint64=Nensayos
-        self.med=numpy.empty(N,dtype=numpy.float64)
-        self.count=numpy.uint64=0
+        self.Nensayos=np.uint64=Nensayos
+        self.med=np.empty(N,dtype=np.float64)
+        self.count=np.uint64=0
  
     def work(self, input_items, output_items):
  
@@ -185,9 +134,9 @@ class e_vector_psd_ff(gr.sync_block):
             out_sig=[(np.float32,N)]
         )
         self.N = N
-        self.Nensayos=numpy.uint64=Nensayos
-        self.med=numpy.empty(N,dtype=numpy.float64)
-        self.count=numpy.uint64=0
+        self.Nensayos=np.uint64=Nensayos
+        self.med=np.empty(N,dtype=np.float64)
+        self.count=np.uint64=0
 
     def vec_average(self, in0):
         # El tamano de la matriz in0 es L[0]xL[1]=L[0]xN
@@ -214,7 +163,183 @@ class e_vector_psd_ff(gr.sync_block):
         out0[:]=self.med
         return len(output_items[0])
 
+#################################################################
+##             Generador de funciones aleatorias               ##
+#################################################################
+class e_generador_fun_f(gr.hier_block2):
+
+    def __init__(self, Sps=4, h=[1,1,1,1]):
+        gr.hier_block2.__init__(
+            self, "e_generador_fun_f",
+            gr.io_signature(0, 0, 0),
+            gr.io_signature(1, 1, gr.sizeof_float*1),
+        )
+        ##################################################
+        # Parameters
+        ##################################################
+        self.Sps = Sps
+        self.h = h
+        ##################################################
+        # Blocks
+        ##################################################
+        self.interp_fir_filter_xxx_0 = filter.interp_fir_filter_fff(Sps, (h))
+        self.interp_fir_filter_xxx_0.declare_sample_delay(0)
+        self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vff((2., ))
+        self.blocks_int_to_float_0 = blocks.int_to_float(1, 1)
+        self.blocks_add_const_vxx_0 = blocks.add_const_vff((-0.5, ))
+        self.analog_random_source_x_0 = blocks.vector_source_i(map(int, np.random.randint(0, 2, 1000000)), True)
+        ##################################################
+        # Connections
+        ##################################################
+        self.connect((self.analog_random_source_x_0, 0), (self.blocks_int_to_float_0, 0))
+        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.blocks_int_to_float_0, 0), (self.blocks_add_const_vxx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.interp_fir_filter_xxx_0, 0))
+        self.connect((self.interp_fir_filter_xxx_0, 0), (self, 0))
+
+    def get_Sps(self):
+        return self.Sps
+
+    def set_Sps(self, Sps):
+        self.Sps = Sps
+
+    def get_h(self):
+        return self.h
+
+    def set_h(self, h):
+        self.h = h
+        self.interp_fir_filter_xxx_0.set_taps((self.h))
+
+from eyediagram.demo_data import demo_data
+from eyediagram.mpl import eyediagram
+import matplotlib.pyplot as plt
+
+#################################################################
+##                         DIAGRAMA DE OJO                     ##
+#################################################################
+
+class vec_diagrama_ojo_f(gr.sync_block):  
+    """hecho por: Homero Ortega Boada. Permite obtener el diagrama de ojo"""
+
+    def __init__(self, Sps=8, N1=2048):
+        gr.sync_block.__init__(self, name='vec_diagrama_ojo_f', in_sig=[(np.float32, N1)], out_sig=None)
+        self.Sps = Sps
+	self.N1 = N1
+
+    def work(self, input_items, output_items):
+        in0 = input_items[0] # in0 es un 2D array (como una matrix)
+        y=in0.reshape(-1)    # Esto traduce el 2D array a 1D array (a un vector)
+        y=y/(y.max()*2.)     # Esto normaliza los valores de y
+                     
+        obj_ojo=eyediagram(y, 2*self.Sps, offset=int(self.Sps/2), cmap=plt.cm.coolwarm)
+        
+        #plt.show()
+        plt.pause(0.0000001)
+        plt.clf()
+        return len(input_items[0])
+#################################################################
+##                         DIAGRAMA DE OJO OPCION 2            ##
+#################################################################
+
+class vec_diagrama_ojo2_f(gr.sync_block):  
+    """hecho por: Homero Ortega Boada. Permite obtener el diagrama de ojo"""
+
+    def __init__(self, Sps=8, N2=2048):
+        gr.sync_block.__init__(self, name='vec_diagrama_ojo_f', in_sig=[(np.float32, N2)], out_sig=None)
+        self.Sps = Sps
+        self.N2 = N2
+
+    def work(self, input_items, output_items):
+        in0 = input_items[0] # in0 es un 2D array (como una matrix)
+        s=in0[0]    # Esto traduce el 2D array a 1D array (a un vector)
+        L=len(s)
+        L2=L/2.
+        t = np.linspace(-L2,L2-1, L)
+        plt.plot(t,s)             
+        plt.pause(0.0000001)
+        return len(input_items[0])
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!                    FUNCIONES PURAS                         !!
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#######################################################
+##               Forma rectangular                   ##
+#######################################################                       
+def rect(Sps):
+    return Sps*[1.,]
 
+#######################################################
+##               Forma de Nyquist                    ##
+#######################################################                       
+def nyq(Sps,ntaps):
+    n=np.linspace(-int(ntaps/2), int(ntaps/2-1),ntaps)
+    h=np.sinc(n/Sps)
+#    return h/numpy.amax(h)
+    return h
+#######################################################
+##               Forma Coseno Alzado                 ##
+#######################################################                       
+def rcos(Sps,ntaps,beta):
+    if beta==0:
+        h=nyq(Sps,ntaps)
+    else:
+        h=ntaps*[0,]
+        for n in range(ntaps):
+            k=n-ntaps/2. # esto es para que h[n] quede centrada en la mitad del vector
+            if abs(k)==Sps/(2.*beta):
+                h[n]=np.sinc(1./(2.*beta))*math.pi/4.
+            else:
+                h[n]=np.sinc(k/Sps)*math.cos(beta*k*math.pi/Sps)/(1.-(2.*beta*k/Sps)**2)                
+    Amp=np.amax(h)
+    return h/Amp
+#######################################################
+##            Forma Raiz de Coseno Alzado            ##
+#######################################################                       
+
+def rrcos(Sps,ntaps,beta):
+    if beta==0:
+        h=nyq(Sps,ntaps)
+    else:
+        h=ntaps*[0,]
+        beta4=4.*beta
+        for n in range(ntaps):
+            k=n-ntaps/2. # esto es para que h[n] quede centrada en la mitad del vector
+            if k==0:
+                h[n]=1+beta*(4./math.pi-1.)
+            elif abs(k)==Sps/beta4:
+                ha=(1.+2./math.pi)*math.sin(math.pi/beta4)
+                hb=(1.-2./math.pi)*math.cos(math.pi/beta4)
+                h[n]=(ha+hb)*beta/math.sqrt(2.)
+            else:
+                ks=k/Sps
+                kspi=math.pi*ks
+                Num=math.sin(kspi*(1-beta))+beta4*ks*math.cos(kspi*(1+beta))
+                Den=kspi*(1.-(beta4*ks)**2)
+                h[n]=Num/Den                
+    Amp=np.amax(h)
+    return h/Amp
+########################################################
+##     Bipolar non return to zero level signal        ##
+########################################################
+def B_NRZ_L(Sps):
+    return Sps*[1.,]
+
+########################################################
+##  Forma sinc . Es la misma nyq() que aparece arriba ##
+########################################################
+def sinc(Sps,ntaps):
+    n=np.linspace(-int(ntaps/2), int(ntaps/2-1),ntaps)
+    h=np.sinc(n/Sps)
+    return h
+########################################################
+##              forma diente se sierra                ##
+########################################################
+def saw(Sps):
+    return np.linspace(0,Sps-1,Sps)/Sps	
+########################################################
+#         Bipolar non return to zero signal           ##
+########################################################
+def RZ(Sps):
+    h=Sps*[1.,]
+    Sps_m=int(Sps/2)
+    h[Sps_m+1:Sps:1]=np.zeros(Sps-Sps_m)
+    return h
